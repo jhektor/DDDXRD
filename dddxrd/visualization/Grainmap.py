@@ -9,7 +9,7 @@ from ImageD11.grain import read_grain_file, write_grain_file
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import sys
-import Cube
+from .Cube import Cube
 import copy
 
 def set_axes_equal(ax):
