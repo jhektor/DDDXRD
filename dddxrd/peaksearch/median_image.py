@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import fabio
-from dddxrd.utils.json_parser import parse_parameters
+from dddxrd.utils.parser import parse_parameters
 import glob
 import os
 
@@ -25,7 +25,8 @@ def median_image(par_file):
     return
 
 def main():
-    par_file = 'dddxrd/tests/median_image.json'
+    par_file = 'dddxrd/tests/median_image.yaml'
     median_image(par_file)
+
 if __name__ == "__main__":
     main()

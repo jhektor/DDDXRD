@@ -1,0 +1,16 @@
+# parameters for peaksearch
+image_path: dddxrd/tests 
+image_stem: load_0N_ #Stem of images
+first_image: 1  # Index of first image
+nbr_images: 2 # Number of images to peaksearch
+filetype: .tif
+output_dir: dddxrd/tests/peaks
+dark_image: dddxrd/tests/median_dark.tif
+omegastep: 0.25
+startomega: 0.125
+thresholds: [20000, 10000, 5000]
+kwargs: '--OmegaOverride' #additional keyword aguments for peaksearch.py as one string
+# parameters for merge_flt
+merged_name: 'merged_peaks.flt'
+par_file: 'dddxrd/tests/junk' #not needed
+pixel_tol: 10 #minimum distance between peaks (pixels)

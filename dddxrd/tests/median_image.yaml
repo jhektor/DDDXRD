@@ -1,0 +1,4 @@
+image_path: dddxrd/tests
+stem: '*dark*'
+output_path: dddxrd/tests
+output_stem: median_dark.tif
