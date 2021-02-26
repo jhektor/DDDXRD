@@ -17,7 +17,7 @@ class Cube:
             intensity = float(grain.intensity_info.split(',')[4].split('=')[-1])
         except IndexError:
             intensity = 0
-        self.size =  intensity**(1./3.)/5
+        self.size =  intensity**(1./3.)*10
         self.points,self.edges = self._cube_points()
         self.ipf_color,self.r,self.phi = self._ipf_color()
 

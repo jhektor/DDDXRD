@@ -9,7 +9,7 @@ from ImageD11.grain import read_grain_file, write_grain_file
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import sys
-from .Cube import Cube
+import dddxrd.visualization.Cube as Cube
 import copy
 
 def set_axes_equal(ax):
@@ -98,7 +98,8 @@ class Grainmap:
         self.rphi = []
         self.rgb = []
         for g in self.grains:
-            if 1:#np.abs(g.translation[2])<30:
+            r = np.sqrt(g.translation[0]**2+g.translation[1]**2+g.translation[2]**2)
+            if r<4000:#1:#np.abs(g.translation[2])<30:
                 c = Cube.Cube(g)
                 # if c.size>35: continue
                 self.cubes.append(c)
@@ -194,11 +195,7 @@ if __name__=='__main__':
             ax.set_ylabel(l[1])
             fig.savefig('{}_{}.svg'.format(stem,v),dpi=300,format='svg',bbox_inches='tight')
 
-        com = gm.com_axis(bins=80)
-        com = com[~np.isnan(com[:,0]),:]
-        #np.savetxt('z16_3dxrd_com.csv',com)
-
-
+        
         fig,ax = ipf_figure(gm.rphi,gm.rgb,gm.size/10)
         fig.savefig('{}_ipf_all.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
 
@@ -212,28 +209,4 @@ if __name__=='__main__':
         np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
         np.savetxt('{}_sizes.csv'.format(stem),gm.size)
 
-        # vals,be,_ = plt.hist(gm.size,bins=100)#gm.ngrains//10)
-        # bc = (be[:-1] + be[1:]) / 2
-        # volume_fraction = bc*vals/np.sum(gm.size)
-        # plt.figure()
-        # plt.hist(volume_fraction)
-        # plt.show()
-        # df
-        #size thresholds
-        lthr = [0,0.02,0.05,0.1,0.2,0.4]
-        hthr = [0.02,0.05,0.1,0.2,0.4,1.]
-
-        for low,high in zip(lthr,hthr):
-            idx = np.where((gm.size/gm.size.max()>low) & (gm.size/gm.size.max()<=high))[0]
-            fig,ax = ipf_figure(np.array(gm.rphi)[idx],np.array(gm.rgb)[idx],np.array(gm.size)[idx]/10)
-            fig.savefig('{}_ipf_{:.3f}-{:.3f}.svg'.format(stem,low,high),dpi=300,format='svg',bbox_inches='tight')
-            plt.clf()
-            gm2 = copy.deepcopy(gm)
-            for i in range(gm2.ngrains):
-                if i not in idx:
-                    gm2.cubes[i].ipf_color=np.array([1.,1.,1.,0])
-            fig,ax=gm2.plot_3d_map(linewidths=.01)
-            fig.savefig('{}_3D_{:.3f}-{:.3f}.svg'.format(stem,low,high),dpi=300,format='svg',bbox_inches='tight')
-
-    #gm.scatterplot(com,np.ones(com.shape[0]))
-    #plt.show()
+        
