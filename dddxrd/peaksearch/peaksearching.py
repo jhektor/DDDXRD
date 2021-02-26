@@ -30,6 +30,7 @@ def run_peaksearch(par_file):
     return
 
 def merge_peaks(par_file):
+    ''' Wrapper for ImageD11 merge_flt.py'''
     pars = parser.parse_parameters(par_file)
     if 'merged_name' in pars:
         outfile = os.path.join(pars['output_dir'],pars['merged_name'])

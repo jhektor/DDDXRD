@@ -22,7 +22,7 @@ def median_image(par_file):
     outfile = os.path.abspath(os.path.join(pars['output_path'],pars['output_stem']))
     tiff.save(outfile)
     print('Saved median image in {}'.format(outfile))
-    return
+    return tiff
 
 def main():
     par_file = 'dddxrd/tests/median_image.yaml'
