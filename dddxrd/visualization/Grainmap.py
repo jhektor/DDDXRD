@@ -10,28 +10,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import sys
 import dddxrd.visualization.Cube as Cube
+import dddxrd.utils.plotting as plu
 import copy
 
-def set_axes_equal(ax):
-    '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
-    cubes as cubes, etc..  This is one possible solution to Matplotlib's
-    ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
-
-    Input
-      ax: a matplotlib axis, e.g., as output from plt.gca().
-    '''
-
-    limits = np.array([
-        ax.get_xlim3d(),
-        ax.get_ylim3d(),
-        ax.get_zlim3d(),
-    ])
-
-    origin = np.mean(limits, axis=1)
-    radius = 0.5 * np.max(np.abs(limits[:, 1] - limits[:, 0]))
-    ax.set_xlim3d([origin[0] - radius, origin[0] + radius])
-    ax.set_ylim3d([origin[1] - radius, origin[1] + radius])
-    ax.set_zlim3d([origin[2] - radius, origin[2] + radius])
 
 
 def ipf_figure(coord,color,size):
@@ -99,7 +80,7 @@ class Grainmap:
         self.rgb = []
         for g in self.grains:
             r = np.sqrt(g.translation[0]**2+g.translation[1]**2+g.translation[2]**2)
-            if r<4000:#1:#np.abs(g.translation[2])<30:
+            if 1:#r<4000:#1:#np.abs(g.translation[2])<30:
                 c = Cube.Cube(g)
                 # if c.size>35: continue
                 self.cubes.append(c)
@@ -117,7 +98,7 @@ class Grainmap:
         for c in self.cubes:
             bb.append(c.get_bounding_box())
             faces = Poly3DCollection(c.edges, linewidths=linewidths, edgecolors=edgecolors)
-            if coloring is "ipf":
+            if coloring == "ipf":
                 if len(c.ipf_color) == 3:
                     faces.set_facecolor(tuple(c.ipf_color)+(alpha,))
                 else:
@@ -131,7 +112,7 @@ class Grainmap:
         ax.set_xlim(ll[0],ul[0])
         ax.set_ylim(ll[1],ul[1])
         ax.set_zlim(ll[2],ul[2])
-        set_axes_equal(ax)
+        plu.set_axes_equal(ax)
         #ax.set_aspect('equal')
         ax.grid(False)
         return fig,ax
@@ -162,7 +143,7 @@ class Grainmap:
                 del kwargs[key]
         if coords.shape[1]==3:
             ax.scatter3D(coords[:,0],coords[:,1],coords[:,2],data,**kwargs)
-            set_axes_equal(ax)
+            plu.set_axes_equal(ax)
 
         else:
             ax.scatter(coords[:,0],coords[:,1],**kwargs)
@@ -208,5 +189,5 @@ if __name__=='__main__':
         header = 'relative grain size, nbr grains'
         np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
         np.savetxt('{}_sizes.csv'.format(stem),gm.size)
-
+        plt.show()
         

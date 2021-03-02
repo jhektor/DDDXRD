@@ -6,8 +6,8 @@ nbr_images: 2 # Number of images to peaksearch
 filetype: .tif
 output_dir: dddxrd/tests/peaks
 dark_image: dddxrd/tests/median_dark.tif
-omegastep: 0.25
-startomega: 0.125
+omegastep: -0.5
+startomega: 358.56
 thresholds: [20000, 10000, 5000]
 kwargs: '--OmegaOverride' #additional keyword aguments for peaksearch.py as one string
 # parameters for merge_flt

@@ -1,0 +1,29 @@
+# parameters for indexing and mapping
+flt_file: dddxrd/tests/peaks/merged_peaks_full.flt
+par_file: dddxrd/tests/fitted_parameters.par
+stem: test #base name for result files
+# indexing parameters
+DSTOL: 0.01 #determines the max width of the rings, depends on energy
+OMEGAFLOAT: -0.25 #half the omega step
+COSTOL: 0.02 # tolerance on angle between spots, depends on step size
+NPKS: 20 #minimum acceptable number of peaks in a grain, depends on crystal structure and how many rings
+#Rings to use for indexing
+RING1: [0,1] 
+RING2: [0,1] 
+#mapping parameters 
+FITPOS: True #fit center of mass position
+TOLSEQ: [0.05,0.03,0.02,0.01] #tolerance for mapping
+SYMMETRY: cubic # crystall symmetry
+tolangle: 0.25 # misorientation angle for merging grains
+toldist: 100. # max distance for merging grains
+# size of grid to map
+xrange: [-750, 751]
+yrange: [-750, 751]
+zrange: [-750, 751]
+#stepsizes
+xstep: 750
+ystep: 750
+zstep: 750 
+gridshape: cube
+plotgrid: False #show a plot of the grid
+NUL: False #disable printing
