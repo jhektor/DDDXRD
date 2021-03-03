@@ -10,7 +10,6 @@ def run_peaksearch(par_file):
     ndigits = parser.find_padding(pars)
     impath = os.path.join(pars['image_path'],pars['image_stem'])
     outpath = os.path.join(pars['output_dir'],'peaks')
-    os.makedirs(outpath, exist_ok=True)
     # construct the command for peaksearch.py
     command = ('peaksearch.py -n {} -F {} -f {:d} -l {:d} -o {} -d {} -p Y --ndigits {:d} -S {:.3f} -T {:.3f} '.format(
         impath,pars['filetype'],first_im,last_im,outpath,
