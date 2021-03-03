@@ -36,15 +36,19 @@ def make_grid(xrange,yrange,zrange,xstep,ystep,zstep,shape='cube',plot=False):
         plt.show()
     return grid
 
-def index_and_map(par_file):
+def index_and_map(par_file=None, pars=None):
     """ Performs indexation and mapping using grid_index_parallel from ImageD11"""
-    pars = parser.parse_parameters(par_file)
+    if (pars is None) and (par_file is not None):
+        pars = parser.parse_parameters(par_file)
+    elif (pars is None) and (par_file is None):
+        print('Must supply either par_file or pars to run_peaksearcher')
+        raise ValueError
     grid = make_grid(pars['xrange'],pars['yrange'],pars['zrange'],pars['xstep'],pars['ystep'],pars['zstep'],plot=pars['plotgrid'],shape=pars['gridshape'])
     grid_index_parallel(pars['flt_file'],pars['par_file'],pars['stem'],pars,grid)
 
 def main():
     par_file = 'dddxrd/tests/indexing.yaml'
-    index_and_map(par_file)
+    index_and_map(par_file=par_file)
 
 if __name__ == "__main__":
     main()

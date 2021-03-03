@@ -2,9 +2,13 @@ import os
 import subprocess
 import dddxrd.utils.parser as parser
 
-def run_peaksearch(par_file):
+def run_peaksearch(par_file=None, pars=None):
     """ Wrapper for the ImageD11 peaksearch.py script"""
-    pars = parser.parse_parameters(par_file)
+    if (pars is None) and (par_file is not None):
+        pars = parser.parse_parameters(par_file)
+    elif (pars is None) and (par_file is None):
+        print('Must supply either par_file or pars to run_peaksearcher')
+        raise ValueError
     first_im = pars['first_image']
     last_im = pars['first_image'] + pars['nbr_images'] - 1
     ndigits = parser.find_padding(pars)
@@ -47,7 +51,7 @@ def merge_peaks(par_file):
     subprocess.call(command, shell=True)
 
 def main(par_file):
-    run_peaksearch(par_file)
+    run_peaksearch(par_file=par_file)
     merge_peaks(par_file)
     return
 
