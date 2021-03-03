@@ -5,9 +5,13 @@ from dddxrd.utils.parser import parse_parameters
 import glob
 import os
 
-def median_image(par_file):
+def median_image(par_file=None, pars=None):
     """ Computes the median image using parameters in par_file"""
-    pars = parse_parameters(par_file)
+    if (pars is None) and (par_file is not None):
+        pars = parser.parse_parameters(par_file)
+    elif (pars is None) and (par_file is None):
+        print('Must supply either par_file or pars to run_peaksearcher')
+        raise ValueError
     print("Looking for images in: {}".format(pars['image_path']))
     glob_pattern = os.path.join(pars['image_path'],pars['stem'])
     img_list = glob.glob(glob_pattern)
