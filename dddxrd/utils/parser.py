@@ -2,6 +2,10 @@ import json
 import yaml
 import os
 
+def parse_fio(file):
+    """ Parse a .fio file from the fastsweep macro at P21.2"""
+
+
 def parse_parameters(file):
     """ Parse parameters stored in a json file. Returns a dictionary"""
     if file.endswith('.json'):
