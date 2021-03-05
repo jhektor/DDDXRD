@@ -66,12 +66,14 @@ def init_yaml_from_fio(fiofile,yamlfile,save_file=True,return_dict=False):
     yaml_dict['omegastep'] = scaninfo['omegastep']
     yaml_dict['startomega'] = scaninfo['startomega']
     if save_file:
-        with open(yamlfile, 'w') as file:
-            yaml.dump(yaml_dict, file)
+        dump_yaml(yamlfile,yaml_dict)
     if return_dict:
         return yaml_dict
     return
-
+def dump_yaml(yamlfile,yaml_dict):
+    with open(yamlfile, 'w') as file:
+        yaml.dump(yaml_dict, file)
+    return
 def parse_parameters(file):
     """ Parse parameters stored in a json file. Returns a dictionary"""
     if file.endswith('.json'):
