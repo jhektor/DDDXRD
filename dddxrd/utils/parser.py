@@ -54,7 +54,7 @@ def print_scan_info(scaninfo):
         else:
             print(keys,scaninfo[keys])
 
-def init_yaml_from_fio(fiofile,yamlfile):
+def init_yaml_from_fio(fiofile,yamlfile,save_file=True,return_dict=False):
     """ Initializes a yaml file with parameters from a fio file"""
     scaninfo = parse_fio(fiofile)
     yaml_dict={}
@@ -65,8 +65,12 @@ def init_yaml_from_fio(fiofile,yamlfile):
     yaml_dict['filetype'] = scaninfo['filetype']
     yaml_dict['omegastep'] = scaninfo['omegastep']
     yaml_dict['startomega'] = scaninfo['startomega']
-    with open(yamlfile, 'w') as file:
-        yaml.dump(yaml_dict, file)
+    if save_file:
+        with open(yamlfile, 'w') as file:
+            yaml.dump(yaml_dict, file)
+    if return_dict:
+        return yaml_dict
+    return
 
 def parse_parameters(file):
     """ Parse parameters stored in a json file. Returns a dictionary"""
