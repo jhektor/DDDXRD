@@ -56,6 +56,9 @@ def print_scan_info(scaninfo):
 
 def init_yaml_from_fio(fiofile,yamlfile=None,save_file=True,return_dict=False):
     """ Initializes a yaml file with parameters from a fio file"""
+    if (not yamlfile) and save_file:
+        print('Must give yaml file name to init_yaml_from_fio')
+        raise ValueError
     scaninfo = parse_fio(fiofile)
     yaml_dict={}
     yaml_dict['image_path'] = scaninfo['channel1_FileDir1']
