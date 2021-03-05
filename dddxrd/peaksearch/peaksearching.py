@@ -33,9 +33,13 @@ def run_peaksearch(par_file=None, pars=None):
         print('peaksearch.py ended with error. It seems to work nonetheless.', a)
     return
 
-def merge_peaks(par_file):
+def merge_peaks(par_file=None,pars=None):
     ''' Wrapper for ImageD11 merge_flt.py'''
-    pars = parser.parse_parameters(par_file)
+    if (pars is None) and (par_file is not None):
+        pars = parser.parse_parameters(par_file)
+    elif (pars is None) and (par_file is None):
+        print('Must supply either par_file or pars to run_peaksearcher')
+        raise ValueError
     if 'merged_name' in pars:
         outfile = os.path.join(pars['output_dir'],pars['merged_name'])
     else:
