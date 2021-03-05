@@ -54,7 +54,7 @@ def print_scan_info(scaninfo):
         else:
             print(keys,scaninfo[keys])
 
-def init_yaml_from_fio(fiofile,yamlfile,save_file=True,return_dict=False):
+def init_yaml_from_fio(fiofile,yamlfile=None,save_file=True,return_dict=False):
     """ Initializes a yaml file with parameters from a fio file"""
     scaninfo = parse_fio(fiofile)
     yaml_dict={}
