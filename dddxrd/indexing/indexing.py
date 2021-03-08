@@ -6,7 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from ImageD11.grid_index_parallel import grid_index_parallel
+lunarc = True
+if lunarc:
+    from dddxrd.indexing.grid_index_parallel import grid_index_parallel
+else:
+    from ImageD11.grid_index_parallel import grid_index_parallel
 
 def make_grid(xrange,yrange,zrange,xstep,ystep,zstep,shape='cube',plot=False):
     """ Make a grid. Should perhaps be moved to utils"""
