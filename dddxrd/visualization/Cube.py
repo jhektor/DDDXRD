@@ -10,7 +10,10 @@ import sys
 class Cube:
     def __init__(self,grain):
         self.ubi = grain.ubi
-        self.u = grain.U
+        try:
+            self.u = grain.U
+        except AttributeError:
+            self.u = grain.u
         #center of mass
         self.com = grain.translation
         try:
