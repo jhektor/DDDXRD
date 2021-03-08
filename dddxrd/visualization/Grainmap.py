@@ -150,10 +150,10 @@ class Grainmap:
             ax.set_aspect(1)
         return fig,ax
 
-if __name__=='__main__':
+def main(maps):
     gms = []
     stems = []
-    for g in sys.argv[1:]:
+    for g in maps:
         gms.append(Grainmap(g))
         stems.append(g.split('.map')[0])
 
@@ -190,4 +190,7 @@ if __name__=='__main__':
         np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
         np.savetxt('{}_sizes.csv'.format(stem),gm.size)
         plt.show()
+
+if __name__=='__main__':
+    main(sys.argv[1:])
         
