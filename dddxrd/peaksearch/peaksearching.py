@@ -2,6 +2,8 @@ import os
 import subprocess
 import dddxrd.utils.parser as parser
 
+lunarc_path = 'python /sw/pkg/ImageD11/1.9.5/imaged11/bin/'
+
 def run_peaksearch(par_file=None, pars=None):
     """ Wrapper for the ImageD11 peaksearch.py script"""
     if (pars is None) and (par_file is not None):
@@ -25,6 +27,9 @@ def run_peaksearch(par_file=None, pars=None):
     # Adds keyword args
     if 'kwargs' in pars:
         command += '{} '.format(pars['kwargs'])
+    # modify command for lunarc
+    if 'lunarc' in pars:
+        command = lunarc_path + command
     print('Running peaksearch with the following command:')
     print(command)
     try:
@@ -51,6 +56,9 @@ def merge_peaks(par_file=None,pars=None):
     else:
         par_file = 'junk'
     command = 'merge_flt.py {} {} {} {:d} '.format(par_file,inp,outfile,pars['pixel_tol']) + ('{:d} '*len(pars['thresholds'])).format(*pars['thresholds'])
+    # modify command for lunarc
+    if 'lunarc' in pars:
+        command = lunarc_path + command
     print(command)
     subprocess.call(command, shell=True)
 
