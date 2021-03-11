@@ -154,6 +154,7 @@ def main(maps):
     gms = []
     stems = []
     for g in maps:
+        print('Adding {} to figure list'.format(g))
         gms.append(Grainmap(g))
         stems.append(g.split('.map')[0])
 
@@ -161,6 +162,7 @@ def main(maps):
     #stem = stems[0]
     # print(gm.ngrains)
     for gm,stem in zip(gms,stems):
+        print('Making plots of {}'.format(gm))
         fig,ax = gm.plot_3d_map()
         fig.savefig('{}_3d.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
 
@@ -189,7 +191,8 @@ def main(maps):
         header = 'relative grain size, nbr grains'
         np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
         np.savetxt('{}_sizes.csv'.format(stem),gm.size)
-        plt.show()
+        print('done')
+        #plt.show()
 
 if __name__=='__main__':
     main(sys.argv[1:])
