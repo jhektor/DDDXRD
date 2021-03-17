@@ -31,7 +31,7 @@ import sys
 # plt.figure()
 # plt.polar(pc[:,1],pc[:,0],'.')
 
-mapfile = "/Users/al8720/Box/projects/castIron/DCI_1_01_merged.map"
+mapfile = "dddxrd/tests/test.map"
 grains = gm.Grainmap(mapfile)
 x=np.array(grains.xy)[:,0]
 y=np.array(grains.xy)[:,1]

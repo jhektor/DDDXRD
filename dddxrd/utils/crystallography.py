@@ -27,3 +27,22 @@ def angle_to_latpar(angle,energy,symmetry='cubic',hkl=[1,1,1],two_theta=True, de
         raise ValueError
     return a
 
+def stereographic_projection(g,carthesian=True,polar=False):
+    """ Stereographic projection of a coordinate vector"""
+    gn = g/np.linalg.norm(g) #normalize the vector
+    alpha = np.arccos(gn[2])
+    beta = np.arccos(gn[0]/(gn[0]**2+gn[1]**2))
+    phi = np.arctan2(gn[1],gn[0])
+    r = np.tan(alpha/2.)
+    px = r*np.cos(phi)
+    py = r*np.sin(phi)
+    if carthesian and polar:
+        return px,py, r, phi
+    elif carthesian:
+        return px,py
+    elif polar:
+        return r,phi
+    else:
+        print('Must choose carhesian or/and polar coordinates in stereographic projection')
+        raise AttributeError
+    
