@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+import dddxrd.visualization.polefigures as pf
+import dddxrd.utils.crystallography as cry
 from ImageD11.grain import read_grain_file
 import sys
 
@@ -22,7 +24,7 @@ class Cube:
             intensity = 0
         self.size =  intensity**(1./3.)*10
         self.points,self.edges = self._cube_points()
-        self.ipf_color,self.r,self.phi = self._ipf_color()
+        self.ipf_color,self.px,self.py,self.r,self.phi = self._ipf_color()
 
 
     def _cube_points(self):
@@ -48,28 +50,9 @@ class Cube:
         return points,edges
 
     def _ipf_color(self):
-        #from xfab/plot_gff not sure how it works...
-        axis = abs(self.u[2,:])
-        rgb = np.zeros((3))
-        for j in range(3):
-            for k in range(j+1,3):
-                if (axis[j]>axis[k]):
-                    rgb[0]=axis[j]
-                    axis[j]=axis[k]
-                    axis[k]=rgb[0]
-        r=np.sqrt(axis[0]*axis[0]/((axis[2]+1))/((axis[2]+1))+(axis[1]/(axis[2]+1)+1)*(axis[1]/(axis[2]+1)+1))
-        if axis[1]==0:
-            phi=0
-        else:
-            phi=np.arctan(axis[0]/axis[1])
-        rgb[0]=((np.sqrt(2.0)-r)/(np.sqrt(2.0)-1))**.5
-        rgb[1]=((1-4*phi/np.pi)*((r-1)/(np.sqrt(2.0)-1)))**.5
-        rgb[2]=(4*phi/np.pi*((r-1)/(np.sqrt(2.0)-1)))**.5
-        mx = max(rgb)
-        rgb = rgb/mx
-        phi = axis[1]/(1+axis[2])
-        r = axis[0]/(1+axis[2])
-        return rgb,r,phi
+        axis = abs(self.u[2,:]) #this only takes the orientations in the fundamental zone
+        rgb,px,py,r,phi = pf.ipf_xfab(axis)
+        return rgb,px,py,r,phi
 
     def get_bounding_box(self):
         x_min,y_min,z_min = np.min(self.points,axis=0)

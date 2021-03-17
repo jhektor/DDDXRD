@@ -11,35 +11,8 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import sys
 import dddxrd.visualization.Cube as Cube
 import dddxrd.utils.plotting as plu
+import dddxrd.visualization.polefigures as pf
 import copy
-
-
-
-def ipf_figure(coord,color,size):
-    #copied from plot_gff
-    fig = plt.figure(10,frameon=False,figsize=plt.figaspect(.9))
-    ax = plt.Axes(fig,[.2,.2,.7,.7])
-    ax.set_axis_off()
-    fig.add_axes(ax)
-    #plot triangle
-    xa = np.zeros((21))
-    ya = np.zeros((21))
-    for i in range(21):
-        ua = np.array([i/20., 1., 1.])
-        UA = np.linalg.norm(ua)
-        za = ua[2]+UA
-        xa[i] = ua[1]/za
-        ya[i] = ua[0]/za
-    plt.plot(xa,ya,'black') # Curved edge
-    plt.plot([0,xa[0]],[0,0.0001],'black',linewidth=2) #lower line
-    plt.plot([xa[20],0],[ya[20],0],'black') # upper line
-    plt.text(-0.01,-0.02,'[001]')
-    plt.text(xa[0]-0.01,-0.02,'[101]')
-    plt.text(xa[-1]-0.01,ya[-1]+0.005,'[111]')
-    for c,rgb,s in zip(coord,color,size):
-        plt.plot(c[1],c[0],'o',color=rgb,alpha=0.6,mec='k',ms=s)
-    return fig,ax
-    #plt.plot(coord[:,0],coord[:,1],'o',color=color)
 
 class Grainmap:
     def __init__(self,mapfile):
@@ -76,6 +49,7 @@ class Grainmap:
         self.cubes = []
         self.size = []
         self.com = []
+        self.xy = [] #ipf coordinates in carhesian
         self.rphi = []
         self.rgb = []
         for g in self.grains:
@@ -86,6 +60,7 @@ class Grainmap:
                 self.cubes.append(c)
                 self.size.append(c.size)
                 self.com.append(c.com)
+                self.xy.append([c.px,c.py])
                 self.rphi.append([c.r,c.phi])
                 self.rgb.append(c.ipf_color)
 
@@ -99,6 +74,7 @@ class Grainmap:
             bb.append(c.get_bounding_box())
             faces = Poly3DCollection(c.edges, linewidths=linewidths, edgecolors=edgecolors)
             if coloring == "ipf":
+                #print(c.ipf_color)
                 if len(c.ipf_color) == 3:
                     faces.set_facecolor(tuple(c.ipf_color)+(alpha,))
                 else:
@@ -106,7 +82,7 @@ class Grainmap:
 
             ax.add_collection3d(faces)
         bb = np.array(bb)
-        print(bb.shape)
+        #print(bb.shape)
         ll = np.min(bb[:,:,0],axis=0)
         ul = np.max(bb[:,:,1],axis=0)
         ax.set_xlim(ll[0],ul[0])
@@ -142,7 +118,7 @@ class Grainmap:
             if key in kwargs:
                 del kwargs[key]
         if coords.shape[1]==3:
-            ax.scatter3D(coords[:,0],coords[:,1],coords[:,2],data,**kwargs)
+            ax.scatter3D(coords[:,0],coords[:,1],coords[:,2],**kwargs)
             plu.set_axes_equal(ax)
 
         else:
@@ -164,35 +140,37 @@ def main(maps):
     for gm,stem in zip(gms,stems):
         print('Making plots of {}'.format(gm))
         fig,ax = gm.plot_3d_map()
-        fig.savefig('{}_3d.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
+        #fig.savefig('{}_3d.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
 
         view = ('top','side','front')
         cind = ([0,1],[0,2],[1,2])
         lab = (['x','y'],['x','z'],['y','z'])
 
         for v,c,l in zip(view,cind,lab):
-            print(gm.com[:,c[1]].shape,gm.size.shape)
-            print(np.array([gm.com[:,c[0]],gm.com[:,c[1]]]).T.shape)
+            #print(gm.com[:,c[1]].shape,gm.size.shape)
+            #print(np.array([gm.com[:,c[0]],gm.com[:,c[1]]]).T.shape)
             fig,ax = gm.scatterplot(np.array([gm.com[:,c[0]],gm.com[:,c[1]]]).T,c=gm.rgb,s=gm.size/2,alpha=0.6,edgecolor='k',marker='o')
             ax.set_xlabel(l[0])
             ax.set_ylabel(l[1])
-            fig.savefig('{}_{}.svg'.format(stem,v),dpi=300,format='svg',bbox_inches='tight')
+            #fig.savefig('{}_{}.svg'.format(stem,v),dpi=300,format='svg',bbox_inches='tight')
 
-        
-        fig,ax = ipf_figure(gm.rphi,gm.rgb,gm.size/10)
-        fig.savefig('{}_ipf_all.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
+        gm.xy = np.array(gm.xy)
+        fig,ax = pf.ipf_figure(gm.xy,gm.rgb,gm.size/10)
+
+        fig,ax=pf.ipf_contour(gm.xy[:,0],gm.xy[:,1],nnodes=100,bins=20,symmetry='cubic')
+        #fig.savefig('{}_ipf_all.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
 
         plt.figure()
         vals,be,_ = plt.hist(gm.size/gm.size.max(),bins=100)#gm.ngrains//10)
         bc = (be[:-1] + be[1:]) / 2
         plt.xlabel('Relative grain size')
         plt.ylabel('Number of grains')
-        plt.savefig('{}_size_hist.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
+        #plt.savefig('{}_size_hist.svg'.format(stem),dpi=300,format='svg',bbox_inches='tight')
         header = 'relative grain size, nbr grains'
-        np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
-        np.savetxt('{}_sizes.csv'.format(stem),gm.size)
+        #np.savetxt('{}_size_hist.csv'.format(stem),np.column_stack((bc,vals)),fmt=['%.3f','%d'],header=header,delimiter=',')
+        #np.savetxt('{}_sizes.csv'.format(stem),gm.size)
         print('done')
-        #plt.show()
+        plt.show()
 
 if __name__=='__main__':
     main(sys.argv[1:])
