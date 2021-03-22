@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.cm as cm
 #matplotlib.use('TkAgg')
 
 import numpy as np
@@ -12,20 +13,39 @@ import sys
 import dddxrd.visualization.Cube as Cube
 import dddxrd.utils.plotting as plu
 import dddxrd.visualization.polefigures as pf
+import dddxrd.utils.strain as strain
 import copy
 
 class Grainmap:
-    def __init__(self,mapfile):
+    def __init__(self,mapfile,d0=None):
         self.grains = read_grain_file(mapfile)
         #center of mass
         com = []
-        npks= []
+        npks = []
         for gr in self.grains:
             #com.append(gr.translation)
             npks.append(int(gr.npks))
         #self.com = np.array(com)
         self.ngrains = len(self.grains)
+        self._strains(d0)
         self._make_cubes()
+
+    def _strains(self,d0=None):
+        self.I1 = []
+        self.J2 = []
+        self.Green_strain = []
+        self.Almansi_strain = []
+        if d0 is None:
+            print('No reference lattice parameters supplied. Will use the average of all grains')
+            d0 = strain.average_cell(self.grains,make_cubic=True)
+        for gr in self.grains:
+            E,e = strain.calc_strain(gr.ubi,d0)
+            i1,j2 = strain.tensor_invariants(e)
+            self.I1.append(i1)
+            self.J2.append(j2)
+            self.Green_strain.append(E)
+            self.Almansi_strain.append(e)
+        return
 
     def com_axis(self,bins=100):
         # bin z coordinate
@@ -67,10 +87,22 @@ class Grainmap:
         self.size = np.array(self.size)
         self.com = np.array(self.com)
 
-    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',**kwargs):
+    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',cmap=cm.viridis,**kwargs):
         fig,ax = self._prepare_figure(projection="3d")
         bb = []
-        for c in self.cubes:
+        if coloring != "ipf":
+            if not 'vmin' in kwargs:
+                vmin = np.min(coloring)
+            else:
+                vmin = kwargs['vmin']
+            if not 'vmax' in kwargs:
+                vmax = np.max(coloring)
+            else:
+                vmax = kwargs['vmax']
+            norm = matplotlib.colors.Normalize(clip=True, vmin=vmin,vmax=vmax)
+            mapper = cm.ScalarMappable(norm=norm, cmap=cmap)
+            plt.colorbar(mapper)
+        for i,c in enumerate(self.cubes):
             bb.append(c.get_bounding_box())
             faces = Poly3DCollection(c.edges, linewidths=linewidths, edgecolors=edgecolors)
             if coloring == "ipf":
@@ -79,7 +111,8 @@ class Grainmap:
                     faces.set_facecolor(tuple(c.ipf_color)+(alpha,))
                 else:
                     faces.set_facecolor(tuple(c.ipf_color))
-
+            else: #for coloring based on scalar data
+                faces.set_facecolor(mapper.to_rgba(coloring[i],alpha=alpha))
             ax.add_collection3d(faces)
         bb = np.array(bb)
         #print(bb.shape)
