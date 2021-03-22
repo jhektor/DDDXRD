@@ -43,8 +43,8 @@ class Grainmap:
             i1,j2 = strain.tensor_invariants(e)
             self.I1.append(i1)
             self.J2.append(j2)
-            self.Green_strain.append(E)
-            self.Almansi_strain.append(e)
+            self.Green_strain.append(strain.matrix_to_voigt(E))
+            self.Almansi_strain.append(strain.matrix_to_voigt(e))
         return
 
     def com_axis(self,bins=100):

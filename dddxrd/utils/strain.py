@@ -2,6 +2,11 @@ import numpy as np
 import xfab.tools
 from ImageD11 import finite_strain as fs
 
+def matrix_to_voigt(e):
+    """ Returns the matrix in Voigt notation [xx,yy,zz,yz,xz,xy]"""
+    return [e[0,0],e[1,1],e[2,2],e[1,2],e[0,2],e[0,1]]
+def voight_to_matrix(e):
+    return np.array([[e[0],e[5],e[4]],[e[5],e[1],e[3]],[e[4],e[3],e[2]]])
 def average_cell(grains,make_cubic=False):
     """ Calculates the average unit cell parameters for a list of grains """
     avg_cell = [0,0,0,0,0,0]
