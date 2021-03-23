@@ -20,21 +20,24 @@ def average_cell(grains,make_cubic=False):
 
 def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
     """ Calculates the strain tensor for one grain in crystal and lab frame
-    The strain tensor in crystal fram is the Green-Lagrange: E = 1/2*(C-I)=1/2*(F^T*F-I)
-    In sample frame it is the Euler-Almansi strain: e = 1/2*(I-c)=1/2*(I-F^(-T)F^(-1))
+    By default, the strain tensor in crystal fram is the Green-Lagrange: E = 1/2*(C-I)=1/2*(F^T*F-I)
+    and in sample frame it is the Euler-Almansi strain: e = 1/2*(I-c)=1/2*(I-F^(-T)F^(-1))
     ubi: (UB)^-1 matrix of the grain
     d0: reference lattice parameters [a,b,c,alpha,beta,gamma]
      """
     if not finite_strain:
         U,eps = xfab.tools.ubi_to_u_and_eps(ubi,d0)
-        return finite_strain.e6_to_symm(eps)
+        return U,fs.e6_to_symm(eps)
     # make reference UBI
     ubi0 = np.diag([d0[0],d0[1],d0[2]]) #only for 90 degree cells
     assert (d0[3]==90) and (d0[3]==90) and (d0[3]==90), "Finite strains are only for cubic refence cells for now"
     ub0 = np.linalg.inv(ubi0)
-    F = fs.DeformationGradientTensor( ubi,ub0 )
-    E = F.finite_strain_ref(m=mr) # strain in crystal
-    e = F.finite_strain_lab(m=ml) # strain in lab
+    dg = fs.DeformationGradientTensor( ubi,ub0 )
+    F=dg.F
+    #E = 0.5*(np.dot(F.T,F)-np.eye(3))
+    #e = 0.5*(np.eye(3)-np.dot(np.linalg.inv(F).T,np.linalg.inv(F)))
+    E = dg.finite_strain_ref(m=mr) # strain in crystal
+    e = dg.finite_strain_lab(m=ml) # strain in lab
     return E, e
 
 def tensor_invariants(e):

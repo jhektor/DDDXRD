@@ -1,6 +1,22 @@
 import numpy as np
 import xfab.symmetry
 
+def rodrigues_rotation(n,theta,radians=True):
+    """ Returns a 3D rotation matrix according to the Rodrigues formula. 
+    n: rotation axis
+    theta: rotation angles
+    """
+    if not radians:
+        theta *= np.pi/180
+    n = n/np.linalg.norm(n)
+    R = np.zeros((3,3))
+    ct = np.cos(theta)
+    st = np.sin(theta)
+    R[0,:] = [ct + n[0]**2*(1-ct), n[0]*n[1]*(1-ct)-n[2]*st, n[0]*n[2]*(1-ct)+n[1]*st]
+    R[1,:] = [n[0]*n[1]*(1-ct)+n[2]*st, ct + n[1]**2*(1-ct), n[1]*n[2]*(1-ct)-n[0]*st]
+    R[2,:] = [n[0]*n[2]*(1-ct)-n[1]*st, n[1]*n[2]*(1-ct)+n[0]*st, ct + n[2]**2*(1-ct)]
+    return R
+
 def energy_to_wavelength(energy):
     ''' Convert energy (keV) to wavelength (Å)'''
     lam = 1.2398/energy # in nm
