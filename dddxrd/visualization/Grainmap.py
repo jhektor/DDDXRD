@@ -38,6 +38,7 @@ class Grainmap:
         if d0 is None:
             print('No reference lattice parameters supplied. Will use the average of all grains')
             d0 = strain.average_cell(self.grains,make_cubic=True)
+        self.d0=d0
         for gr in self.grains:
             E,e = strain.calc_strain(gr.ubi,d0)
             i1,j2 = strain.tensor_invariants(e)
@@ -141,7 +142,7 @@ class Grainmap:
             pass
         return fig,ax
 
-    def scatterplot(self,coords,**kwargs):
+    def scatterplot(self,coords,cbar=True,**kwargs):
         #Check if 3D
         if coords.shape[1]==3:
             kwargs["projection"] = "3d"
@@ -155,8 +156,10 @@ class Grainmap:
             plu.set_axes_equal(ax)
 
         else:
-            ax.scatter(coords[:,0],coords[:,1],**kwargs)
+            im=ax.scatter(coords[:,0],coords[:,1],**kwargs)
             ax.set_aspect(1)
+            if cbar:
+                fig.colorbar(im)
         return fig,ax
 
 def main(maps):
