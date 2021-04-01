@@ -1,29 +1,13 @@
 import numpy as np
 import xfab.tools
 from ImageD11 import finite_strain as fs
+import matplotlib.pyplot as plt
 
 def matrix_to_voigt(e):
     """ Returns the matrix in Voigt notation [xx,yy,zz,yz,xz,xy]"""
     return [e[0,0],e[1,1],e[2,2],e[1,2],e[0,2],e[0,1]]
 def voight_to_matrix(e):
     return np.array([[e[0],e[5],e[4]],[e[5],e[1],e[3]],[e[4],e[3],e[2]]])
-
-def average_cell(grains,make_cubic=False):
-    """ Calculates the average unit cell parameters for a list of grains """
-    avg_cell = [0,0,0,0,0,0]
-    ls = []
-    for g in grains:
-        avg_cell += g.unitcell
-        ls.append(g.unitcell)
-    ls = np.array(ls)
-    avg_cell /= len(grains)
-    print('Average parameters: ',avg_cell)
-    #print('min',np.min(ls,axis=0))
-    #print('max',np.max(ls,axis=0))
-    if make_cubic:
-        a = (avg_cell[0]+avg_cell[1]+avg_cell[2])/3
-        avg_cell = [a,a,a,90,90,90]
-    return avg_cell
 
 def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
     """ Calculates the strain tensor for one grain in crystal and lab frame
@@ -52,7 +36,59 @@ def tensor_invariants(e):
     If the tensor is strain/stress:
     I1 is the volumetric strain/stress
     J2 is the magnitude of shear strain/stress"""
+    if e.ndim==1:
+        e = voight_to_matrix(e)
     I1 = np.trace(e)
     I2 = 0.5*(I1**2-np.trace(np.linalg.matrix_power(e,2)))
     J2 = I1**2-2*I2
     return I1,J2
+
+def _fill_C3(cs):
+    """ helper function for filling the C matrix for isotropy and cubic anisotropy"""
+    C = np.zeros((6,6))
+    C[0,:] = [cs[0],cs[2],cs[2],0,0,0]
+    C[1,:] = [cs[2],cs[0],cs[2],0,0,0]
+    C[2,:] = [cs[2],cs[2],cs[0],0,0,0]
+    C[3,:] = [0,0,0,cs[1],0,0]
+    C[4,:] = [0,0,0,0,cs[1],0]
+    C[5,:] = [0,0,0,0,0,cs[1]]
+    return C
+def _fill_C9(cs):
+    """ helper function for filling the C matrix for transverse isotropy and orthotropy"""
+    C = np.zeros((6,6))
+    C[0,:] = [cs[0],cs[8],cs[7],0,0,0]
+    C[1,:] = [cs[8],cs[1],cs[6],0,0,0]
+    C[2,:] = [cs[7],cs[6],cs[2],0,0,0]
+    C[3,:] = [0,0,0,cs[3],0,0]
+    C[4,:] = [0,0,0,0,cs[4],0]
+    C[5,:] = [0,0,0,0,0,cs[5]]
+    return C
+def elasticty_matrix(cs):
+    """ Returns the 6x6 elasticity matrix from the coefficients cs. The lengts of coeff determines how the matrix looks:
+    Isotropic: cs = [K,mu]
+    Cubic anisotropy: cs = [C11,C44,C12]
+    Transverse isotropy: cs = [C11,C33,C44,C66,C13]
+    Orthotropic: cs = [C11,C22,C33,C44,C55,C66,C12,C13,C22,C23]
+    """
+    if len(cs) == 2:
+        print('Setting up isotropic elasticity matrix')
+        K = cs[0]
+        mu = cs[1]
+        d = K+4.*mu/3.
+        od = K - 2.*mu/3.
+        C = _fill_C3([d,mu,od])
+    elif len(cs) == 3:
+        print('Setting up cubic anisotropy')
+        C = _fill_C3(cs)
+    elif len(cs) == 5:
+        print('Setting up transverse anisotropy')
+        cc = [cs[0],cs[0],cs[1],cs[2],cs[2],cs[3],cs[4],cs[4],cs[0]-2*cs[3]]
+        C = _fill_C9(cc)
+    elif len(cs) == 9:
+        C = _fill_C9(cs)
+    else:
+        raise ValueError("C matrix with {:d} independent parameters is not implemented.".format(len(cs)))
+    return C
+ 
+def calc_stress(C,E):
+    return np.dot(C,E)

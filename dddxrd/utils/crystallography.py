@@ -1,6 +1,7 @@
 import numpy as np
 import xfab.symmetry
-
+from scipy import stats
+#TODO: code for rotating between lab and crystal frame
 def rodrigues_rotation(n,theta,radians=True):
     """ Returns a 3D rotation matrix according to the Rodrigues formula. 
     n: rotation axis
@@ -42,6 +43,24 @@ def angle_to_latpar(angle,energy,symmetry='cubic',hkl=[1,1,1],two_theta=True, de
         print('angle_to_latpar is only implemented for cubic crystals')
         raise ValueError
     return a
+    
+def average_cell(grains,make_cubic=False):
+    """ Calculates the average unit cell parameters for a list of grains """
+    ls = []
+    for g in grains:
+        ls.append(g.unitcell)
+    ls = np.array(ls)
+    for i,r in enumerate(ls.T):
+        # z-score to remove outliers
+        z = np.abs(stats.zscore(r))
+        r = np.where(z>3,np.nan,r)
+        ls.T[i] = r
+    avg_cell = np.nanmean(ls,axis=0)
+    if make_cubic:
+        a = (avg_cell[0]+avg_cell[1]+avg_cell[2])/3
+        avg_cell = [a,a,a,90,90,90]
+    print('Average parameters: ',avg_cell)
+    return avg_cell
 
 def stereographic_projection(g,carthesian=True,polar=False):
     """ Stereographic projection of a coordinate vector"""

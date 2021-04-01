@@ -14,6 +14,7 @@ import dddxrd.visualization.Cube as Cube
 import dddxrd.utils.plotting as plu
 import dddxrd.visualization.polefigures as pf
 import dddxrd.utils.strain as strain
+import dddxrd.utils.crystallography as cry
 import copy
 
 class Grainmap:
@@ -37,7 +38,7 @@ class Grainmap:
         self.Almansi_strain = []
         if d0 is None:
             print('No reference lattice parameters supplied. Will use the average of all grains')
-            d0 = strain.average_cell(self.grains,make_cubic=True)
+            d0 = cry.average_cell(self.grains,make_cubic=True)
         self.d0=d0
         for gr in self.grains:
             E,e = strain.calc_strain(gr.ubi,d0)
