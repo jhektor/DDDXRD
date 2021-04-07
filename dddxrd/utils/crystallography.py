@@ -1,7 +1,10 @@
 import numpy as np
 import xfab.symmetry
 from scipy import stats
-#TODO: code for rotating between lab and crystal frame
+
+def crystal_to_sample(X,U):
+    return np.dot(U,np.dot(X,U.T))
+
 def rodrigues_rotation(n,theta,radians=True):
     """ Returns a 3D rotation matrix according to the Rodrigues formula. 
     n: rotation axis
