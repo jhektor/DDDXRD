@@ -29,7 +29,7 @@ def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
     #E = 0.5*(np.dot(F.T,F)-np.eye(3))
     #e = 0.5*(np.eye(3)-np.dot(np.linalg.inv(F).T,np.linalg.inv(F)))
     E = dg.finite_strain_ref(m=mr) # strain in crystal
-    e = dg.finite_strain_lab(m=ml) # strain in lab
+    e = dg.finite_strain_lab(m=ml) # strain in sample
     return E, e
 
 def tensor_invariants(e):
