@@ -78,6 +78,7 @@ class Grainmap:
             r = np.sqrt(g.translation[0]**2+g.translation[1]**2+g.translation[2]**2)
             if 1:#r<4000:#1:#np.abs(g.translation[2])<30:
                 c = Cube.Cube(g)
+                c.name = g.name.strip()
                 # if c.size>35: continue
                 self.cubes.append(c)
                 self.size.append(c.size)
@@ -89,9 +90,14 @@ class Grainmap:
         self.size = np.array(self.size)
         self.com = np.array(self.com)
 
-    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',cmap=cm.viridis,**kwargs):
+    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',cmap=cm.viridis,filter=None,**kwargs):
         fig,ax = self._prepare_figure(projection="3d")
         bb = []
+        alphal = np.full((self.ngrains),alpha)
+        if filter:
+            for i,c in enumerate(self.cubes):
+                if c.name not in filter:
+                    alphal[i]=0 #make grains transparent if filtered out
         if coloring != "ipf":
             if not 'vmin' in kwargs:
                 vmin = np.min(coloring)
@@ -110,11 +116,11 @@ class Grainmap:
             if coloring == "ipf":
                 #print(c.ipf_color)
                 if len(c.ipf_color) == 3:
-                    faces.set_facecolor(tuple(c.ipf_color)+(alpha,))
+                    faces.set_facecolor(tuple(c.ipf_color)+(alphal[i],))
                 else:
                     faces.set_facecolor(tuple(c.ipf_color))
             else: #for coloring based on scalar data
-                faces.set_facecolor(mapper.to_rgba(coloring[i],alpha=alpha))
+                faces.set_facecolor(mapper.to_rgba(coloring[i],alpha=alphal[i]))
             ax.add_collection3d(faces)
         bb = np.array(bb)
         #print(bb.shape)

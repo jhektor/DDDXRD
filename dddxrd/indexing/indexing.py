@@ -5,6 +5,8 @@ import dddxrd.utils.plotting as plu
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from ImageD11.grain import read_grain_file, write_grain_file
+import shutil
 
 lunarc = True
 if lunarc:
@@ -49,6 +51,66 @@ def index_and_map(par_file=None, pars=None):
         raise ValueError
     grid = make_grid(pars['xrange'],pars['yrange'],pars['zrange'],pars['xstep'],pars['ystep'],pars['zstep'],plot=pars['plotgrid'],shape=pars['gridshape'])
     grid_index_parallel(pars['flt_file'],pars['par_file'],pars['stem'],pars,grid)
+
+def match_grains(mapfiles,outfiles,dist_tol=100,ang_tol=0.5):
+    """ Match and relabel grains across map-files.
+    mapfiles: list of map files to match. Will edit the "name" key of the grain object so that the name is the same for common grains.
+    outfiles: list of filenames to save the matched maps 
+    dist_tol: tolerance for distance between CoM position
+    ang_tol: tolerance for misorientation angles """
+    nmaps = len(mapfiles)
+    assert nmaps>1, 'Must provide more than one mapfile to match_grains'
+    #rename grains in reference map
+    for i in range(nmaps-1):
+        nmatch = 0
+        #match grains from two consecutive map-files
+        match_map = mapfiles[i+1]
+        print('Match map: {}'.format(match_map))
+        if i ==0:
+            ref_map = mapfiles[i]
+            print('Reference map: {}'.format(ref_map))
+            gm_ref = read_grain_file(ref_map)
+            print('Relabelling first reference map')
+            for j,g in enumerate(gm_ref):
+                g.name = str(j)
+            print('Saving reference .map to {}'.format(outfiles[i]))
+            write_grain_file(outfiles[i],gm_ref)
+            ngrains = len(gm_ref)
+        gm_match = read_grain_file(match_map)
+        #loop over match map
+        for g in gm_match:
+            r = g.Rod
+            x,y,z = g.translation
+            # print('Matching grain {}'.format(g.name))
+            dmin = dist_tol
+            amin = ang_tol
+            idx = None
+            #loop over reference map
+            for j,gr in enumerate(gm_ref):
+                r0 = gr.Rod
+                x0,y0,z0 = gr.translation
+                dist=np.sqrt((x-x0)**2+(y-y0)**2+(z-z0)**2) #distance between CoM in ref and match map
+                ang = np.arccos(np.dot(r0,r)/(np.linalg.norm(r)*np.linalg.norm(r0)))*180/np.pi #angle between Rodriguez vectors
+                #find the best match
+                if (dist<dmin) and (ang<amin):
+                    dmin=dist
+                    amin=ang
+                    idx = j
+            if idx: #match these grains
+                nmatch += 1
+                match = gm_ref[idx]
+                g.name = match.name
+            else: # new grain
+                ngrains += 1
+                g.name = str(ngrains)
+
+
+        print('Matched {:d} out of {:d} grains'.format(nmatch,len(gm_match)))
+        print('Saving matched .map to {}'.format(outfiles[i+1]))
+        write_grain_file(outfiles[i], gm_match) 
+        gm_ref = gm_match
+    print('The total dataset contains {:d} grains.'.format(ngrains))
+    return
 
 def main():
     par_file = 'dddxrd/tests/indexing.yaml'
