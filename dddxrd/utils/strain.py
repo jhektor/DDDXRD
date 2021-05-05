@@ -32,6 +32,16 @@ def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
     e = dg.finite_strain_lab(m=ml) # strain in sample
     return E, e
 
+def eigenvalues(e,return_vectors = False):
+    """ Calculates eigenvalues and vectors (optionally) of a symmetric 3x3 matrix (i.e. stress or strain tensor)"""
+    e = np.array(e)
+    if e.ndim==1:
+        e=voight_to_matrix(e)
+    w,v = np.linalg.eigh(e)
+    if return_vectors:
+        return w,v
+    return w
+
 def tensor_invariants(e):
     """ Calculates invariants of a tensor. 
     If the tensor is strain/stress:

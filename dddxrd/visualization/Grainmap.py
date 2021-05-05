@@ -36,6 +36,7 @@ class Grainmap:
         self.J2 = []
         self.Green_strain = []
         self.Almansi_strain = []
+        self.principal_strain = []
         if d0 is None:
             print('No reference lattice parameters supplied. Will use the average of all grains')
             d0 = cry.average_cell(self.grains,make_cubic=True)
@@ -47,6 +48,8 @@ class Grainmap:
             self.J2.append(j2)
             self.Green_strain.append(strain.matrix_to_voigt(E))
             self.Almansi_strain.append(strain.matrix_to_voigt(e))
+            w = strain.eigenvalues(e)
+            self.principal_strain.append(w)
         return
 
     def com_axis(self,bins=100):

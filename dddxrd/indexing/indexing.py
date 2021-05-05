@@ -107,7 +107,7 @@ def match_grains(mapfiles,outfiles,dist_tol=100,ang_tol=0.5):
 
         print('Matched {:d} out of {:d} grains'.format(nmatch,len(gm_match)))
         print('Saving matched .map to {}'.format(outfiles[i+1]))
-        write_grain_file(outfiles[i], gm_match) 
+        write_grain_file(outfiles[i+1], gm_match) 
         gm_ref = gm_match
     print('The total dataset contains {:d} grains.'.format(ngrains))
     return
