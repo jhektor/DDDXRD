@@ -78,7 +78,10 @@ def match_grains(mapfiles,outfiles,dist_tol=100,ang_tol=0.5):
             ngrains = len(gm_ref)
         gm_match = read_grain_file(match_map)
         #loop over match map
-        for g in gm_match:
+        print('Starting matching. This might take a while...')
+        for k,g in enumerate(gm_match): #Parallelize
+            if k%10 == 0:
+                print('Matching grain {:d} of {:d}'.format(k,len(gm_match)))
             r = g.Rod
             x,y,z = g.translation
             # print('Matching grain {}'.format(g.name))
