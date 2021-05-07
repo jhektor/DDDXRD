@@ -93,7 +93,7 @@ class Grainmap:
         self.size = np.array(self.size)
         self.com = np.array(self.com)
 
-    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',cmap=cm.viridis,filter=None,**kwargs):
+    def plot_3d_map(self,coloring="ipf",alpha=0.6,linewidths=0.2,edgecolors='k',cmap=cm.viridis,filter=None,sliceing=None,**kwargs):
         fig,ax = self._prepare_figure(projection="3d")
         bb = []
         alphal = np.full((self.ngrains),alpha)
@@ -101,6 +101,12 @@ class Grainmap:
             for i,c in enumerate(self.cubes):
                 if c.name not in filter:
                     alphal[i]=0 #make grains transparent if filtered out
+        if sliceing:
+            xlim,ylim,zlim = sliceing #defines area to be removed
+            for i,c in enumerate(self.cubes):
+                if (c.com[0]>xlim[0]) and (c.com[0]<xlim[1]) and (c.com[1]>ylim[0]) and (c.com[1]<ylim[1]) and (c.com[2]>zlim[0]) and (c.com[2]<zlim[1]):
+                    alphal[i] = 0
+                
         if coloring != "ipf":
             if not 'vmin' in kwargs:
                 vmin = np.min(coloring)
