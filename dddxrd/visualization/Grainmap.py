@@ -152,10 +152,23 @@ class Grainmap:
             pass
         return fig,ax
 
-    def scatterplot(self,coords,cbar=True,**kwargs):
+    def scatterplot(self,coords,filter=None,cbar=True,**kwargs):
         #Check if 3D
         if coords.shape[1]==3:
             kwargs["projection"] = "3d"
+
+        # apply filter
+        if filter:
+            #find rows for filter grains
+            filt_idx = []
+            for i,g in enumerate(self.grains):
+                if g.name.strip() in filter:
+                    filt_idx.append(i)
+            coords = coords[filt_idx,:]
+            for key in ['c','s']:
+                if key in kwargs:
+                    kwargs[key] = kwargs[key][filt_idx]
+
         fig,ax = self._prepare_figure(**kwargs)
         #remove stuff from kwargs because scatter is not well implemented
         for key in ["projection","xlabel","ylabel","zlabel","elev","azim"]:
