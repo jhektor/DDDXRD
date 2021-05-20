@@ -22,10 +22,10 @@ class Grainmap:
         self.grains = read_grain_file(mapfile)
         #center of mass
         com = []
-        npks = []
+        self.npks = []
         for gr in self.grains:
             #com.append(gr.translation)
-            npks.append(int(gr.npks))
+            self.npks.append(int(gr.npks))
         #self.com = np.array(com)
         self.ngrains = len(self.grains)
         self._strains(d0)
