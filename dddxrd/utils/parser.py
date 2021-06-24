@@ -2,6 +2,9 @@ import json
 import yaml
 import os
 import numpy as np
+import xfab.tools
+import dddxrd.utils.crystallography as cry
+
 
 def parse_fio(file,nchannels=1):
     """ Parse a .fio file from the fastsweep macro at P21.2. 
@@ -108,12 +111,41 @@ def find_padding(pars):
         raise RuntimeError('format string problem, revisit')
     return ndigits
 
+def hexrd_to_map(infile,outfile):
+    """ Converts an outfile from hexrd to something similar to a .map file from makemap.py"""
+    indata = np.genfromtxt(infile)
+    with open(outfile,'w') as f:
+        for g in indata:
+            f.write('#translation: {:.3f} {:.3f} {:.3f}\n'.format(1000*g[6],1000*g[7],1000*g[8]))
+            f.write('#name {:d}\n'.format(int(g[0])))
+            f.write('#intensity_info sum_of_all = 10000 , middle 45 from 0.000000 to 180.000000 in tth: median = 10000 , min = 10000 , max = 10000 , mean = 10000 , std = 10000 , n = 1\n')
+            f.write('#npks 1 \n')
+            f.write('#nuniq {:.3f}\n'.format(g[1]))  #completeness instead of nuniq
+            f.write('#Rod {:.6f} {:.6f} {:.6f}\n'.format(g[3],g[4],g[5]))
+            U = xfab.tools.rod_to_u([g[3],g[4],g[5]])
+            Ui = np.linalg.inv(U)
+            ##Rotate to fable coordinates
+            #R1 = cry.rodrigues_rotation([0,1,0],90,radians=False)
+            #R2= cry.rodrigues_rotation([1,0,0],180,radians=False)
+            #R = np.dot(R2,R1)
+            #Ui = np.dot(R.T,np.dot(U,R))
+            f.write('#UBI\n') #this is U^-1 not UBI
+            f.write('{:.9f} {:.9f} {:.9f}\n'.format(*Ui[0]))
+            f.write('{:.9f} {:.9f} {:.9f}\n'.format(*Ui[2]))
+            f.write('{:.9f} {:.9f} {:.9f}\n'.format(*Ui[1]))
+            f.write('\n')
+    return
+
 def main():
-    fiofile = '/Users/al8720/Box/projects/Inconel/eh3scan1_00055.fio'
-    info = parse_fio(fiofile)
-    print_scan_info(info)
-    yamlfile = '/Users/al8720/Box/projects/Inconel/peaksearch_fio.yaml'
-    init_yaml_from_fio(fiofile,yamlfile)
+    #fiofile = '/Users/al8720/Box/projects/Inconel/eh3scan1_00055.fio'
+    #info = parse_fio(fiofile)
+    #print_scan_info(info)
+    #yamlfile = '/Users/al8720/Box/projects/Inconel/peaksearch_fio.yaml'
+    #init_yaml_from_fio(fiofile,yamlfile)
+    infile = '/Users/al8720/projects/benjamin/grains.out'
+    outfile = '/Users/al8720/projects/benjamin/grains.map'
+
+    hexrd_to_map(infile,outfile)
 
 if __name__ == "__main__":
     main()

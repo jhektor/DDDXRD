@@ -10,7 +10,7 @@ from ImageD11.grain import read_grain_file
 import sys
 
 class Cube:
-    def __init__(self,grain):
+    def __init__(self,grain,axs=2):
         self.ubi = grain.ubi
         try:
             self.u = grain.U
@@ -22,9 +22,9 @@ class Cube:
             intensity = float(grain.intensity_info.split(',')[4].split('=')[-1])
         except IndexError:
             intensity = 0
-        self.size =  intensity**(1./3.)*10
+        self.size =  intensity**(1./3.)*5
         self.points,self.edges = self._cube_points()
-        self.ipf_color,self.px,self.py,self.r,self.phi = self._ipf_color()
+        self.ipf_color,self.px,self.py,self.r,self.phi = self._ipf_color(axs=axs)
 
 
     def _cube_points(self):
@@ -49,8 +49,8 @@ class Cube:
                   ]
         return points,edges
 
-    def _ipf_color(self):
-        axis = abs(self.u[2,:]) #this only takes the orientations in the fundamental zone
+    def _ipf_color(self,axs=2):
+        axis = abs(self.u[axs,:]) #this only takes the orientations in the fundamental zone
         rgb,px,py,r,phi = pf.ipf_xfab(axis)
         return rgb,px,py,r,phi
 

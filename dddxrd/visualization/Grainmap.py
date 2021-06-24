@@ -18,7 +18,7 @@ import dddxrd.utils.crystallography as cry
 import copy
 
 class Grainmap:
-    def __init__(self,mapfile,d0=None):
+    def __init__(self,mapfile,d0=None,axs=2):
         self.grains = read_grain_file(mapfile)
         #center of mass
         com = []
@@ -29,7 +29,7 @@ class Grainmap:
         #self.com = np.array(com)
         self.ngrains = len(self.grains)
         self._strains(d0)
-        self._make_cubes()
+        self._make_cubes(axs=axs)
 
     def _strains(self,d0=None):
         self.I1 = []
@@ -70,7 +70,7 @@ class Grainmap:
             g.translation = com
         self._make_cubes()
 
-    def _make_cubes(self):
+    def _make_cubes(self,axs=2):
         self.cubes = []
         self.size = []
         self.com = []
@@ -80,7 +80,7 @@ class Grainmap:
         for g in self.grains:
             r = np.sqrt(g.translation[0]**2+g.translation[1]**2+g.translation[2]**2)
             if 1:#r<4000:#1:#np.abs(g.translation[2])<30:
-                c = Cube.Cube(g)
+                c = Cube.Cube(g,axs=axs)
                 c.name = g.name.strip()
                 # if c.size>35: continue
                 self.cubes.append(c)
@@ -196,7 +196,7 @@ def main(maps):
     stems = []
     for g in maps:
         print('Adding {} to figure list'.format(g))
-        gms.append(Grainmap(g))
+        gms.append(Grainmap(g,axs=1))
         stems.append(g.split('.map')[0])
 
     #gm = gms[0]
