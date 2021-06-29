@@ -122,7 +122,8 @@ def hexrd_to_map(infile,outfile):
             f.write('#npks 1 \n')
             f.write('#nuniq {:.3f}\n'.format(g[1]))  #completeness instead of nuniq
             f.write('#Rod {:.6f} {:.6f} {:.6f}\n'.format(g[3],g[4],g[5]))
-            U = xfab.tools.rod_to_u([g[3],g[4],g[5]])
+            # U = xfab.tools.rod_to_u([g[3],g[4],g[5]])
+            U = xfab.tools.rod_to_u([g[5],g[3],g[4]])
             Ui = np.linalg.inv(U)
             ##Rotate to fable coordinates
             #R1 = cry.rodrigues_rotation([0,1,0],90,radians=False)

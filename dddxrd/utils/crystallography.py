@@ -72,8 +72,11 @@ def stereographic_projection(g,carthesian=True,polar=False):
     beta = np.arccos(gn[0]/(gn[0]**2+gn[1]**2))
     phi = np.arctan2(gn[1],gn[0])
     r = np.tan(alpha/2.)
-    px = r*np.cos(phi)
-    py = r*np.sin(phi)
+    px = gn[0]/(1+gn[2])#r*np.cos(phi)
+    py = gn[1]/(1+gn[2])#r*np.sin(phi)    
+    # px1 = r*np.cos(phi)
+    # py1 = r*np.sin(phi)
+    #print(px1,px,py1,py)
     if carthesian and polar:
         return px,py, r, phi
     elif carthesian:

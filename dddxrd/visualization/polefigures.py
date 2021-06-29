@@ -20,7 +20,7 @@ def ipf_figure(coord,color,size):
     """ Plots and inverse pole figure where the size of the circles are proportional to the grain volumes.
     Only works for cubic materials"""
     #copied from plot_gff
-    fig = plt.figure(10,frameon=False,figsize=plt.figaspect(.9))
+    fig = plt.figure(frameon=False,figsize=plt.figaspect(.9))
     ax = plt.Axes(fig,[.2,.2,.7,.7])
     ax.set_axis_off()
     fig.add_axes(ax)

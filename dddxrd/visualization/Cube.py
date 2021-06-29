@@ -8,9 +8,16 @@ import dddxrd.visualization.polefigures as pf
 import dddxrd.utils.crystallography as cry
 from ImageD11.grain import read_grain_file
 import sys
+import xfab.symmetry 
+
+xa,ya = pf._ipf_triangle_cubic()
+v0 =[0,0]
+v1 = [np.max(xa),0]
+v2 = [xa[np.argmax(ya)],np.max(ya)]
+
 
 class Cube:
-    def __init__(self,grain,axs=2):
+    def __init__(self,grain,axs=[0,0,1]):
         self.ubi = grain.ubi
         try:
             self.u = grain.U
@@ -49,8 +56,8 @@ class Cube:
                   ]
         return points,edges
 
-    def _ipf_color(self,axs=2):
-        axis = abs(self.u[axs,:]) #this only takes the orientations in the fundamental zone
+    def _ipf_color(self,axs=[0,0,1]):
+        axis = np.abs(np.dot(self.u.T,axs)) 
         rgb,px,py,r,phi = pf.ipf_xfab(axis)
         return rgb,px,py,r,phi
 

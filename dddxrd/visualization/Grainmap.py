@@ -18,7 +18,7 @@ import dddxrd.utils.crystallography as cry
 import copy
 
 class Grainmap:
-    def __init__(self,mapfile,d0=None,axs=2):
+    def __init__(self,mapfile,d0=None,axs=[0,0,1]):
         self.grains = read_grain_file(mapfile)
         #center of mass
         com = []
@@ -70,7 +70,7 @@ class Grainmap:
             g.translation = com
         self._make_cubes()
 
-    def _make_cubes(self,axs=2):
+    def _make_cubes(self,axs=[0,0,1]):
         self.cubes = []
         self.size = []
         self.com = []
@@ -166,10 +166,7 @@ class Grainmap:
         # apply filter
         if filter:
             #find rows for filter grains
-            filt_idx = []
-            for i,g in enumerate(self.grains):
-                if g.name.strip() in filter:
-                    filt_idx.append(i)
+            filt_idx = self.filter_arrays(filter)
             coords = coords[filt_idx,:]
             for key in ['c','s']:
                 if key in kwargs:
@@ -190,6 +187,18 @@ class Grainmap:
             if cbar:
                 fig.colorbar(im)
         return fig,ax
+
+    def filter_arrays(self,filter):
+        """ Find indices of grains matching the names in filter
+        Input
+            gmap: Grainmap object
+            filter: list of names of grains to keep
+        """
+        filt_idx = []
+        for i,g in enumerate(self.grains):
+            if g.name.strip() in filter:
+                filt_idx.append(i) 
+        return filt_idx
 
 def main(maps):
     gms = []
