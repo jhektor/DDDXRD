@@ -10,6 +10,17 @@ def matrix_to_voigt(e):
 def voight_to_matrix(e):
     return np.array([[e[0],e[5],e[4]],[e[5],e[1],e[3]],[e[4],e[3],e[2]]])
 
+def von_mises(stress):
+    """ Calculate von Mises stress"""
+    _, J2 = tensor_invariants(stress)
+    return np.sqrt(3*J2)
+
+def triaxiality(stress):
+    """ Calculate triaxiality value of a stress tensor"""
+    I1,_ = tensor_invariants(stress)
+    vm = von_mises(stress)
+    return I1/(3.*vm)
+
 def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
     """ Calculates the strain tensor for one grain in crystal and lab frame
     By default, the strain tensor in crystal fram is the Green-Lagrange: E = 1/2*(C-I)=1/2*(F^T*F-I)
@@ -22,7 +33,7 @@ def calc_strain(ubi,d0,mr=1,ml=-1,finite_strain=True):
         return U,fs.e6_to_symm(eps)
     # make reference UBI
     ubi0 = np.diag([d0[0],d0[1],d0[2]]) #only for 90 degree cells
-    assert (d0[3]==90) and (d0[3]==90) and (d0[3]==90), "Finite strains are only for cubic refence cells for now"
+    assert (d0[3]==90) and (d0[4]==90) and (d0[5]==90), "Finite strains are only for cubic refence cells for now"
     ub0 = np.linalg.inv(ubi0)
     dg = fs.DeformationGradientTensor( ubi,ub0 )
     #F=dg.F
@@ -52,7 +63,7 @@ def tensor_invariants(e):
         e = voight_to_matrix(e)
     I1 = np.trace(e)
     I2 = 0.5*(I1**2-np.trace(np.linalg.matrix_power(e,2)))
-    J2 = I1**2-2*I2
+    J2 = 1./3.*I1**2-I2
     return I1,J2
 
 def _fill_C3(cs):

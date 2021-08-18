@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.cm as cm
 #matplotlib.use('TkAgg')
+from matplotlib.colors import to_rgba
 
 import numpy as np
 import glob
@@ -11,6 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import sys
 import dddxrd.visualization.Cube as Cube
+import dddxrd.visualization.Sphere as Sphere
+
 import dddxrd.utils.plotting as plu
 import dddxrd.visualization.polefigures as pf
 import dddxrd.utils.strain as strain
@@ -18,7 +21,7 @@ import dddxrd.utils.crystallography as cry
 import copy
 
 class Grainmap:
-    def __init__(self,mapfile,d0=None,axs=[0,0,1]):
+    def __init__(self,mapfile,d0=None,axs=[0,0,1],shape='cube'):
         self.grains = read_grain_file(mapfile)
         #center of mass
         com = []
@@ -29,7 +32,7 @@ class Grainmap:
         #self.com = np.array(com)
         self.ngrains = len(self.grains)
         self._strains(d0)
-        self._make_cubes(axs=axs)
+        self._make_shapes(axs=axs,shape=shape)
 
     def _strains(self,d0=None):
         self.I1 = []
@@ -70,8 +73,8 @@ class Grainmap:
             g.translation = com
         self._make_cubes()
 
-    def _make_cubes(self,axs=[0,0,1]):
-        self.cubes = []
+    def _make_shapes(self,axs=[0,0,1],shape='cube'):
+        self.shapes = []
         self.size = []
         self.com = []
         self.xy = [] #ipf coordinates in carhesian
@@ -80,10 +83,13 @@ class Grainmap:
         for g in self.grains:
             r = np.sqrt(g.translation[0]**2+g.translation[1]**2+g.translation[2]**2)
             if 1:#r<4000:#1:#np.abs(g.translation[2])<30:
-                c = Cube.Cube(g,axs=axs)
+                if shape == 'cube':
+                    c = Cube.Cube(g,axs=axs)
+                elif shape == 'sphere': 
+                    c = Sphere.Sphere(g,axs=axs)
                 c.name = g.name.strip()
                 # if c.size>35: continue
-                self.cubes.append(c)
+                self.shapes.append(c)
                 self.size.append(c.size)
                 self.com.append(c.com)
                 self.xy.append([c.px,c.py])
@@ -98,16 +104,16 @@ class Grainmap:
         bb = []
         alphal = np.full((self.ngrains),alpha)
         if filter:
-            for i,c in enumerate(self.cubes):
+            for i,c in enumerate(self.shapes):
                 if c.name not in filter:
                     alphal[i]=0 #make grains transparent if filtered out
         if sliceing:
             xlim,ylim,zlim = sliceing #defines area to be removed
-            for i,c in enumerate(self.cubes):
+            for i,c in enumerate(self.shapes):
                 if (c.com[0]>xlim[0]) and (c.com[0]<xlim[1]) and (c.com[1]>ylim[0]) and (c.com[1]<ylim[1]) and (c.com[2]>zlim[0]) and (c.com[2]<zlim[1]):
                     alphal[i] = 0
                 
-        if coloring != "ipf":
+        if (coloring != "ipf") and (type(coloring[0])!=str):
             if not 'vmin' in kwargs:
                 vmin = np.min(coloring)
             else:
@@ -119,7 +125,7 @@ class Grainmap:
             norm = matplotlib.colors.Normalize(clip=True, vmin=vmin,vmax=vmax)
             mapper = cm.ScalarMappable(norm=norm, cmap=cmap)
             plt.colorbar(mapper)
-        for i,c in enumerate(self.cubes):
+        for i,c in enumerate(self.shapes):
             bb.append(c.get_bounding_box())
             faces = Poly3DCollection(c.edges, linewidths=linewidths, edgecolors=edgecolors)
             if coloring == "ipf":
@@ -128,6 +134,8 @@ class Grainmap:
                     faces.set_facecolor(tuple(c.ipf_color)+(alphal[i],))
                 else:
                     faces.set_facecolor(tuple(c.ipf_color))
+            elif type(coloring[i])==str: #color by a list of strings
+                faces.set_facecolor(to_rgba(coloring[i],alphal[i]))
             else: #for coloring based on scalar data
                 faces.set_facecolor(mapper.to_rgba(coloring[i],alpha=alphal[i]))
             ax.add_collection3d(faces)
@@ -203,9 +211,10 @@ class Grainmap:
 def main(maps):
     gms = []
     stems = []
+    shape = 'sphere'
     for g in maps:
         print('Adding {} to figure list'.format(g))
-        gms.append(Grainmap(g,axs=1))
+        gms.append(Grainmap(g,axs=1,shape=shape))
         stems.append(g.split('.map')[0])
 
     #gm = gms[0]

@@ -144,7 +144,7 @@ def _tri_create_nodes(v1,v2,nno=100):
             hit += 1
     return xa,ya
 
-def _polar_contour(thetas, rs, num_bins=96, theta_lim=[0,2*np.pi], r_lim=[0,1], radians=True, return_data = False):
+def _polar_contour(thetas, rs, num_bins=96, theta_lim=[-np.pi,np.pi], r_lim=[0,1], radians=True, return_data = False):
     """
     Makes a filled contourplot of pole figure data
     """
@@ -153,8 +153,14 @@ def _polar_contour(thetas, rs, num_bins=96, theta_lim=[0,2*np.pi], r_lim=[0,1], 
 
     r =  np.linspace(*r_lim,num=num_bins,endpoint=True)
     th =  np.linspace(*theta_lim,num=num_bins,endpoint=True)
-    vals,xe,ye = np.histogram2d(thetas,rs,bins=num_bins) #bin ipf data in theta - r polar coordinates
+    v,xe,ye = np.histogram2d(thetas,rs,bins=[th,r]) #bin ipf data in theta - r polar coordinates
     rgr,thgr = np.meshgrid(r,th) #make a grid
+    #correct the shape of vals
+    vals = np.zeros(rgr.shape)
+    vals[:-1,:-1] = v 
+    vals[-1] = vals[0]      # copy the top row to the bottom
+    #vals[:,-1] = vals[:,0]  # copy the left column to the right
+
     if return_data:
         return thgr, rgr, vals
     else:

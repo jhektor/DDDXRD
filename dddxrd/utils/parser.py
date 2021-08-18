@@ -116,14 +116,14 @@ def hexrd_to_map(infile,outfile):
     indata = np.genfromtxt(infile)
     with open(outfile,'w') as f:
         for g in indata:
-            f.write('#translation: {:.3f} {:.3f} {:.3f}\n'.format(1000*g[6],1000*g[7],1000*g[8]))
+            f.write('#translation: {:.3f} {:.3f} {:.3f}\n'.format(-1000*g[8],-1000*g[6],1000*g[7]))
             f.write('#name {:d}\n'.format(int(g[0])))
             f.write('#intensity_info sum_of_all = 10000 , middle 45 from 0.000000 to 180.000000 in tth: median = 10000 , min = 10000 , max = 10000 , mean = 10000 , std = 10000 , n = 1\n')
             f.write('#npks 1 \n')
             f.write('#nuniq {:.3f}\n'.format(g[1]))  #completeness instead of nuniq
             f.write('#Rod {:.6f} {:.6f} {:.6f}\n'.format(g[3],g[4],g[5]))
-            # U = xfab.tools.rod_to_u([g[3],g[4],g[5]])
-            U = xfab.tools.rod_to_u([g[5],g[3],g[4]])
+            #U = xfab.tools.rod_to_u([g[3],g[4],g[5]])
+            U = xfab.tools.rod_to_u([-g[5],-g[3],g[4]])
             Ui = np.linalg.inv(U)
             ##Rotate to fable coordinates
             #R1 = cry.rodrigues_rotation([0,1,0],90,radians=False)
