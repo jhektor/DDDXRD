@@ -17,10 +17,17 @@ def run_peaksearch(par_file=None, pars=None):
     impath = os.path.join(pars['image_path'],pars['image_stem'])
     outpath = os.path.join(pars['output_dir'],'peaks')
     # construct the command for peaksearch.py
-    command = ('peaksearch.py -n {} -F {} -f {:d} -l {:d} -o {} -d {} -p Y --ndigits {:d} -S {:.3f} -T {:.3f} '.format(
-        impath,pars['filetype'],first_im,last_im,outpath,
-        pars['dark_image'],ndigits,pars['omegastep'], pars['startomega']
-        ))
+    try: 
+        pars['dark_image']
+        command = ('peaksearch.py -n {} -F {} -f {:d} -l {:d} -o {} -d {} -p Y --ndigits {:d} -S {:.3f} -T {:.3f} '.format(
+            impath,pars['filetype'],first_im,last_im,outpath,
+            pars['dark_image'],ndigits,pars['omegastep'], pars['startomega']
+            ))
+    except KeyError:
+        command = ('peaksearch.py -n {} -F {} -f {:d} -l {:d} -o {} -p Y --ndigits {:d} -S {:.3f} -T {:.3f} '.format(
+            impath,pars['filetype'],first_im,last_im,outpath,
+            ndigits,pars['omegastep'], pars['startomega']
+            ))
     # Adds threshold values to command
     for t in pars['thresholds']:
         command += '-t {:d} '.format(t)
