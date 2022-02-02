@@ -13,9 +13,13 @@ def run_peaksearch(par_file=None, pars=None):
         raise ValueError
     first_im = pars['first_image']
     last_im = pars['first_image'] + pars['nbr_images'] - 1
-    ndigits = parser.find_padding(pars)
+    if not 'ndigits' in pars:
+        ndigits = parser.find_padding(pars)
+    else:
+        ndigits = pars['ndigits']
     impath = os.path.join(pars['image_path'],pars['image_stem'])
     outpath = os.path.join(pars['output_dir'],'peaks')
+    os.makedirs(pars['output_dir'],exist_ok=True)
     # construct the command for peaksearch.py
     try: 
         pars['dark_image']
