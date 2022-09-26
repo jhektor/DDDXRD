@@ -27,10 +27,31 @@ def energy_to_wavelength(energy):
     lam *= 10
     return lam
 
-def braggs_law(wavelength, theta, degree=False):
+def braggs_law(wavelength, theta=None, degree=False, d=None):
+    assert theta or d, 'Must give either theta or d'
     if degree:
         theta = np.deg2rad(theta)
-    return wavelength/(2*np.sin(theta))
+    if not d:
+        return wavelength/(2*np.sin(theta))
+    else:
+        tth=2*(np.arcsin(wavelength/(2*d))) #this is two theta
+        if degree:
+            tth = np.rad2deg(tth)
+        return tth
+
+def check_reflection(hkl,symmetry='fcc'):
+    '''Check if a refection is allowd of forbidden based on the symmetry. Only fcc or bcc'''
+    assert symmetry in ['primitive','fcc','bcc'], 'check_reflection only implemented for primitive, fcc or bcc'
+    h,k,l=hkl[0], hkl[1],hkl[2]
+    if h+k+l==0:
+        allowed=False
+    else:
+        if symmetry=='bcc':
+            allowed=(h+k+l)%2==0
+        if symmetry=='fcc':
+            allowed = ((h%2==1 and k%2==1 and l%2==1) or (h%2==0 and k%2==0 and l%2==0)) # all odd or all even
+    return allowed
+
 
 def angle_to_latpar(angle,energy,symmetry='cubic',hkl=[1,1,1],two_theta=True, degrees=True):
     '''Convert diffraction angle to lattice parameter. Does not check for forbidden reflections. Only cubic for now.'''
@@ -46,7 +67,13 @@ def angle_to_latpar(angle,energy,symmetry='cubic',hkl=[1,1,1],two_theta=True, de
         print('angle_to_latpar is only implemented for cubic crystals')
         raise ValueError
     return a
+
+def d_spacing(hkl,latticeparameter, symmetry='cubic'):
+    assert symmetry in ['cubic','fcc','bcc'], 'd_spacing only works for cubic crystals'
+    d2=latticeparameter**2/(hkl[0]**2+hkl[1]**2+hkl[2]**2)
+    return np.sqrt(d2)
     
+
 def average_cell(grains,make_cubic=False):
     """ Calculates the average unit cell parameters for a list of grains """
     ls = []
